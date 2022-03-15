@@ -1,4 +1,4 @@
-clean
+% clean % alias for clear all; close all; clc;
 
 saveData    = true;
 gapFill     = true;
@@ -13,7 +13,6 @@ pathGrace   = '/Volumes/GDRIVE/DATA/global/GRACE/';
 pathSave    = '/Users/coop558/mydata/interface/recession/matfiles/';
 
 load('coastlines.mat');
-% load('defaultcolors.mat'); % this is just matlabs default color order
 
 % note on resolution: '0.25 degree grid; however the mascons are estimated
 % on a 1-degree equal area mascons and the native resolution of the
@@ -23,7 +22,7 @@ load('coastlines.mat');
 % function method i use below, but not sure about time zone
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%% read the GRACE data
+% read the GRACE data
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % read the grace data:
@@ -56,7 +55,7 @@ bbox    	= [minlon,minlat;maxlon,maxlat];
 xbox        = [bbox(1),bbox(2),bbox(2),bbox(1),bbox(1)];
 ybox        = [bbox(3),bbox(3),bbox(4),bbox(4),bbox(3)];
 
-% plot it
+% for plotting, plot the average 
 LWEavg      = mean(LWE,3);
 LWE0        = zeros(size(LWEavg));
 
@@ -68,10 +67,10 @@ LWEcrop0        = zeros(size(LWEcrop,1),size(LWEcrop,2));
 LWE         = LWEcrop;
 R           = Rcrop;
 [LON,LAT]   = R2grat(R);
-LON         = wrapTo180(LON);       % the basins are -180:180
+LON         = wrapTo180(LON);       % the basins are -180:180 so wrap grace too
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%% plot it
+% plot it
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % plot the global data
@@ -96,7 +95,7 @@ hold on; geoshow(coastlat,coastlon); colorbar
 set(gca,'ColorScale','log'); axis tight; plot(xbox,ybox,'r');
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%% Gap filling
+% Gap filling
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % make a calendar for the gap-filled data, for the reference period
@@ -119,7 +118,7 @@ buffer  = 0;
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-%% example of running for one point
+% example of running for one point
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
@@ -140,7 +139,7 @@ Data = fillGRACE(TnoFill,lwe(1,:),opts);
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-%% This is how I ran the algorithm for a shapefile of basins - 
+% This is how I ran the algorithm for a shapefile of basins - 
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
