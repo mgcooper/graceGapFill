@@ -11,3 +11,5 @@ Journal of Geophysical Research: Solid earth
 Shuang Yi, Nico Sneeuw
 https://doi.org/10.1029/2020JB021227
 Shuang Yi, shuangyi.geo@gmail.com, 05/12/2021
+
+Usage: see runGraceGapFill.m for an example of how I used the algorithm.
