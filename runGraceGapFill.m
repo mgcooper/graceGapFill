@@ -135,7 +135,7 @@ opts.pathSave   = pathSave;
 % false, and saveFigs true, the figures will be made and saved to look at
 % later
 
-Data = bfra_fillGRACE(TnoFill,lwe(1,:),opts);
+Data = fillGRACE(TnoFill,lwe(1,:),opts);
 
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
