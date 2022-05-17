@@ -6,13 +6,11 @@ plotFigs    = true;    % if false, figures are not made
 showFigs    = true;     % if false, figure is made but not shown
 saveFigs    = false;
 
-% pathGrace   = '/path/to/GRACE/data/';
-% pathSave    = '/path/to/save/the/data/';
+pathGrace   = '/path/to/GRACE/data/';
+pathSave    = '/path/to/save/the/data/';
 
-pathGrace   = '/Volumes/GDRIVE/DATA/global/GRACE/';
-pathSave    = '/Users/coop558/mydata/interface/recession/matfiles/';
-
-load('coastlines.mat');
+% the grace data used here is from the university of texas at austin:
+% http://www2.csr.utexas.edu/grace/RL06_mascons.html
 
 % note on resolution: '0.25 degree grid; however the mascons are estimated
 % on a 1-degree equal area mascons and the native resolution of the
@@ -20,6 +18,8 @@ load('coastlines.mat');
 
 % the calendar is gregorian, which should be correct using the datetime
 % function method i use below, but not sure about time zone
+
+load('coastlines.mat'); % useful for plotting
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % read the GRACE data
@@ -143,9 +143,11 @@ Data = fillGRACE(TnoFill,lwe(1,:),opts);
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-% % bounds is a strucutre read-in by shaperead. This loop finds the lat/lon
-% % values for Grace from above that are within the basin + buffer and then
-% % gap-fills all those points and saves the data one file per basin
+% % bounds is a structure that contains polyshape objects, one for each 
+% % basin, created by reading in basin shapefiles and converting the lat-
+% % lon values to polyshapes. This loop finds the Grace lat/lon values 
+% % within each basin+buffer, gap-fills all those points and saves the data 
+% % one file per basin. see util/pointsinPoly and util/fillGRACE. 
 % 
 % for n = 1:nbasins
 %      
@@ -160,7 +162,7 @@ Data = fillGRACE(TnoFill,lwe(1,:),opts);
 %     if gapFill == true
 %         fprintf('working on basin %d\n',n);
 %         
-%         Data = bfra_fillGRACE(TnoFill,Sa);
+%         Data = fillGRACE(TnoFill,Sa);
 %         
 %         % note - this saves all the 'cells' meaning the data at all the 
 %         % sub-basin interpolation points
