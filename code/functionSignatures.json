@@ -1,0 +1,17 @@
+{
+   "_schemaVersion": "1.0.0",
+   "graceGapFill":
+   {
+      "inputs":
+      [
+         {"name":"time",      "kind": "required",  "type": ["datetime"]},
+         {"name":"S",         "kind": "required",  "type": ["numeric"]},
+         {"name":"plotfigs",  "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"savefigs",  "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"showfigs",  "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"pathsave",  "kind": "namevalue", "type": ["char"]},
+         {"name":"adddata",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"olddata",   "kind": "namevalue", "type": ["struct"]}
+      ]
+   }
+}
