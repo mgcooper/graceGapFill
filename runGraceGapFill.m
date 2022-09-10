@@ -47,11 +47,11 @@ T           = datetime(datenum(T1)+Grace.time,'ConvertFrom','datenum');
 % T           = datetime(2002,1,1,0,0,0) + days(grace.time);
 
 % build a bounding box around the arctic
-minlat  	= 40; 
+minlat      = 40; 
 minlon		= -170;
-maxlat  	= 85; 
+maxlat      = 85; 
 maxlon 		= -48;
-bbox    	= [minlon,minlat;maxlon,maxlat];
+bbox        = [minlon,minlat;maxlon,maxlat];
 xbox        = [bbox(1),bbox(2),bbox(2),bbox(1),bbox(1)];
 ybox        = [bbox(3),bbox(3),bbox(4),bbox(4),bbox(3)];
 

@@ -1,7 +1,7 @@
-function data = bfra_fillGRACE(time,S,opts)
+function data = graceGapFill(time,S,opts)
    
     % INPUTS:
-    %   time    = datetime array of GRACE data
+    %   time    = datetime array for GRACE data
     %   S       = numeric array of GRACE time series
     %   opts    = structure of options, see below for options
     
@@ -17,10 +17,9 @@ function data = bfra_fillGRACE(time,S,opts)
     % verror2:  error esimation, based on the cross validation (if implemented, 
     %           otherwise based on fitting residuals).
     
-    % Author: Shuang Yi, shuangyi.geo@gmail.com, 05/12/2021
-    
-    % (Converted to a function by Matt Cooper matt.cooper@pnnl.gov with
-    % some extra functionality)
+    % Author: Matt Cooper matt.cooper@pnnl.gov (Based on script written by
+    % Shuang Yi, shuangyi.geo@gmail.com, 05/12/2021, see reference below
+    % and associated github repo) 
     
     % This function implements the GRACE gap-filling algorithm in the
     % reference below. The function is based on the script that comes with
@@ -59,15 +58,15 @@ function data = bfra_fillGRACE(time,S,opts)
 
     ser(:,1)    = decyear;  % time in decimal years
 
-    % find the unique values - Major improvement in runtime. Note - this
-    % is applicable to the case whre you first interpolate the raw Grace
-    % data to a set of points, e.g. a basin shapefile, and the points have
-    % identical data, b/c the Grace data is itself an interpolated product
-    % and adjacent 'grid cells' sometiems have identical data, so there's
-    % no point in running the slow algorithm over identical data, or
-    % because the interpolation points you used are at a smaller spatial
-    % resolution than the raw data, so they all just equal the single grace
-    % point they are nearest (assumes you used nearest neighbor)
+    % use the unique values for major improvement in runtime. This could be
+    % applicable if the raw Grace data were first interpolated to a set of
+    % points, e.g. a basin shapefile, or some other geospatial data, at a
+    % different resolution, and you end up with multiple points with
+    % identical data, b/c you used nearest neighbor resampling. Or, maybe
+    % the grace data you are using has redundant data, for the same reason
+    % as above, b/c the Grace data is itself an interpolated product. This
+    % step runs the slow algorithm over the unique data points and then
+    % substitutes the solutions into the matching points that weren't run.
     [S0,iSa,iSb] = unique(S(:,1));
     
     numUnique   = numel(S0);        
@@ -86,22 +85,23 @@ function data = bfra_fillGRACE(time,S,opts)
    %for n = 1:nS
     for n = 1:numUnique % mgc only gap-fill the unique values
 
-       %ser(:,2)    = S(n,:);   % grace twsa, I am guessing
-        ser(:,2)    = S(iSa(n),:);   % grace twsa data for this point
+       %ser(:,2)    = S(n,:); 
+        ser(:,2)  = S(iSa(n),:);   % grace twsa data for this point
 
-        % generate uniformly spaced time series
-        [tt1,X1]    = uniform_time(ser(:,1),ser(:,2), [2002,4,2021,6]);
+        % generate uniformly spaced time series. note - this needs
+        % improvement, so that the time period is not hard coded
+        [tt1,X1]  = uniform_time(ser(:,1),ser(:,2), [2002,4,2021,6]);
 
         %~~~~~~~~~~~~~~~~~~~~~~
         %   SSA-filling-a 
         %~~~~~~~~~~~~~~~~~~~~~~
-        ind_nan     = isnan(X1);
-        id          = zeros(size(tt1)); % classify observations and gaps by id
+        inan      = isnan(X1);
+        id        = zeros(size(tt1)); % classify observations and gaps by id
 
-        id(tt1<2017.5 & ~ind_nan)   = 1; % 1: GRACE
-        id(tt1>2017.5 & ~ind_nan)   = 2; % 2: GFO
-        id(tt1<2017.5 & ind_nan)    = 3; % 3: gaps within GRACE
-        id(tt1>2017.5 & ind_nan)    = 4; % 4: the 11-month gap & a gap within GFO
+        id(tt1<2017.5 & ~inan)   = 1; % 1: GRACE
+        id(tt1>2017.5 & ~inan)   = 2; % 2: GFO
+        id(tt1<2017.5 & inan)    = 3; % 3: gaps within GRACE
+        id(tt1>2017.5 & inan)    = 4; % 4: the 11-month gap & a gap within GFO
 
         [X2,verror1] = fun_SSA_filling_a(X1,id, MM, KK);
 
