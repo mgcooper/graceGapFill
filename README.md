@@ -1,6 +1,8 @@
 This repo is an implementation of the GRACE gap-filling algorithm in the reference below. 
 
-The example run script distributed with that repo was repackaged into a function in util/fillGrace.m
+The example run script distributed with that repo was repackaged into a function graceGapFill.m
+
+The actual algorithm (and original code) is in code/. 
 
 Some of the original code was reformatted to read easier and some comments were added.
 
