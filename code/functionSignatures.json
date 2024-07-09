@@ -4,14 +4,42 @@
    {
       "inputs":
       [
-         {"name":"time", "kind": "required", "type": ["datetime"]},
-         {"name":"lwe", "kind": "required", "type": ["numeric"]},
-         {"name":"plotFiguresFlag", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"saveFiguresFlag", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"showFiguresFlag", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"pathNameOutputs", "kind": "namevalue", "type": ["char"]},
-         {"name":"appendNewDataFlag", "kind": "namevalue", "type": ["logical", "scalar"], "purpose":"Option"},
-         {"name":"GraceData", "kind": "namevalue", "type": ["struct"]}
+         {"name":"time",
+          "kind": "required",
+          "type": ["datetime"]},
+
+         {"name":"lwe",
+          "kind": "required",
+          "type": ["numeric"]},
+
+         {"name":"pathname_outputs",
+          "kind": "namevalue",
+          "type": ["char"]},
+
+         {"name":"plot_figures_flag",
+          "kind": "namevalue",
+          "type": ["logical","scalar"],"purpose":"Option"},
+
+         {"name":"save_figures_flag",
+          "kind": "namevalue",
+          "type": ["logical","scalar"],"purpose":"Option"},
+
+         {"name":"show_figures_flag",
+          "kind": "namevalue",
+          "type": ["logical","scalar"],"purpose":"Option"},
+
+         {"name":"append_data_flag",
+          "kind": "namevalue",
+          "type": ["logical", "scalar"], "purpose":"Option"},
+
+         {"name":"ignore_nonunique_flag",
+          "kind": "namevalue",
+          "type": ["logical", "scalar"], "purpose":"Option"},
+
+         {"name":"GraceData",
+          "kind": "namevalue",
+          "type": ["struct"]}
       ]
    }
 }
+

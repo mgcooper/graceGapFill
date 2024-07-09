@@ -79,7 +79,7 @@ function Data = graceGapFill(time, lwe, varargin)
 
    % Ignore identical values of lwe, which may occur if the data was resampled
    % to a finer resolution e.g. to within a river basin, using nearest neighbor
-   if kwargs.ignoreNonUniqueValues
+   if kwargs.ignore_nonunique_flag
       [S0, iSa, iSb] = unique(lwe(:, 1));
       nS = numel(S0);
 
@@ -96,7 +96,7 @@ function Data = graceGapFill(time, lwe, varargin)
    % Option to append new data to existing data saved locally, previously
    % processed by this function. Here, no need to gapfill unless the
    % new data contains gaps.
-   if kwargs.appendNewDataFlag
+   if kwargs.append_data_flag
       Data = appendNewData(t0, time, lwe, id, kwargs);
    end
 
@@ -136,9 +136,9 @@ function Data = graceGapFill(time, lwe, varargin)
          t_uniform, s_part_a, Mlist, Klist);
 
       % make plots
-      if kwargs.plotFiguresFlag
+      if kwargs.plot_figures_flag
          if n == 1
-            if kwargs.showFiguresFlag
+            if kwargs.show_figures_flag
                figure('position',[1,1,1028,303],'Visible','on');
             else
                figure('position',[1,1,1028,303],'Visible','off');
@@ -147,20 +147,23 @@ function Data = graceGapFill(time, lwe, varargin)
 
          plot(t_uniform,s_part_b,'o-','color',[1,1,1]/2);
          hold on
-         errorbar(t_uniform(id == 3), s_part_a(id == 3), ones(sum(id == 3),1)*s_error_a, ...
-            'ro', 'markerfacecolor', 'r');
-         errorbar(t_uniform(id == 4), s_part_b(id == 4), ones(sum(id == 4),1)*s_error_b, ...
-            'bo', 'markerfacecolor', 'b');
+
+         errorbar(t_uniform(id == 3), s_part_a(id == 3), ...
+            ones(sum(id == 3),1)*s_error_a, 'ro', 'markerfacecolor', 'r');
+
+         errorbar(t_uniform(id == 4), s_part_b(id == 4), ...
+            ones(sum(id == 4),1)*s_error_b, 'bo', 'markerfacecolor', 'b');
+
          legend('Final series', 'SSA-filling-a', 'SSA-filling-b', ...
             'location', 'best');
          title(sprintf('Optimal parameter: M = %d, K = %d', optimal_MK));
 
-         if kwargs.saveFiguresFlag
+         if kwargs.save_figures_flag
             filename = fullfile(...
-               kwargs.pathNameOutputs, ['gap_filled_' int2str(n) '.png']);
+               kwargs.pathname_outputs, ['gap_filled_' int2str(n) '.png']);
             exportgraphics(gcf, filename, 'Resolution', 300);
          end
-         if kwargs.showFiguresFlag
+         if kwargs.show_figures_flag
             pause
          end
          if n < nS
@@ -204,12 +207,12 @@ function kwargs = parseinputs(time, lwe, mfilename, varargin)
    parser.FunctionName = mfilename;
    parser.addRequired('time', @isdatetime);
    parser.addRequired('lwe', @isnumeric);
-   parser.addParameter('pathNameOutputs', '', @ischar);
-   parser.addParameter('plotFiguresFlag', false, @islogical);
-   parser.addParameter('saveFiguresFlag', false, @islogical);
-   parser.addParameter('showFiguresFlag', false, @islogical);
-   parser.addParameter('ignoreNonUniqueValues', false, @islogical);
-   parser.addParameter('appendNewDataFlag', false, @islogical);
+   parser.addParameter('pathname_outputs', '', @ischar);
+   parser.addParameter('plot_figures_flag', false, @islogical);
+   parser.addParameter('save_figures_flag', false, @islogical);
+   parser.addParameter('show_figures_flag', false, @islogical);
+   parser.addParameter('ignore_nonunique_flag', false, @islogical);
+   parser.addParameter('append_data_flag', false, @islogical);
    parser.addParameter('GraceData', struct(), @isstruct);
    parser.parse(time, lwe, varargin{:});
    kwargs = parser.Results;
