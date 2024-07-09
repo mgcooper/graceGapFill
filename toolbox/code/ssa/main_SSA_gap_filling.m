@@ -2,16 +2,16 @@
 % SH = load_SH('csr06');
 % [vCS,LIST] = SH.reformat('vCS');
 % tt = [SH.tt];
-% 
+%
 % ind = find(LIST(:,1) == 6 & LIST(:,2) == -3);
-% 
+%
 % ser = [tt',vCS(ind,:)'];
 % save('example_C30.mat','ser');
 
 %% input of time series
 % Only the time series of C30 is provided. The time spans from 2002.4 to 2020.8
 clear;
-load('example_C30.mat'); 
+load('example_C30.mat');
 % ser(:,1): time in decimal years
 % ser(:,2): value of C(3,0)
 
@@ -35,22 +35,22 @@ KK = 10; % Maximum number of RCs to be used
 % verror1: error estimation, based on fitting residuals
 
 %% SSA-filling-b
-Mlist = 24:12:96; 
-Klist = [1,2:2:12]; 
+Mlist = 24:12:96;
+Klist = [1,2:2:12];
 
-% The following code traverses Mlist & Klist to implement the cross validation to find 
+% The following code traverses Mlist & Klist to implement the cross validation to find
 % the optimal parameter set.
 % If both Mlist and Klist consist of only one element, the value will be used
 % directly.
 [X3,verror2,opt_MK] = fun_SSA_filling_b(tt1,X2,Mlist,Klist);
 % X3: final output, all gaps are filled
-% verror2: error esimation, based on the cross validation (if implemented, 
+% verror2: error esimation, based on the cross validation (if implemented,
 %          otherwise based on fitting residuals).
 
 %% plot
 figure('position',[1,1,1028,303]);
 plot(tt1,X3,'o-','color',[1,1,1]/2);
-hold on; 
+hold on;
 errorbar(tt1(id == 3),X2 (id==3), ones(sum(id==3),1)*verror1,'ro','markerfacecolor','r');
 errorbar(tt1(id == 4),X3 (id==4), ones(sum(id==4),1)*verror2,'bo','markerfacecolor','b');
 hold off;
