@@ -1,13 +1,17 @@
 function [X,Y] = R2grat(R)
-   %R2GRID [X,Y] = R2grat(R) constructs 2-d grids X and Y of coordinate pairs
-   %from spatial referencing object R
+   %R2GRID construct graticules X and Y from spatial referencing object R
    %
-   % Author: matt cooper (matt.cooper@pnnl.gov)
+   % R2GRID [X,Y] = R2grat(R) constructs 2-d grids X and Y of coordinate pairs
+   % from spatial referencing object R
+   %
+   % Author: matt cooper (guycooper@ucla.edu)
+   %
+   % See also
 
    %% Check inputs
 
    % confirm mapping toolbox is installed
-   assert(license('test','map_toolbox') == 1, ...
+   assert(license('test','map_toolbox')==1, ...
       'rasterinterp requires Matlab''s Mapping Toolbox.')
 
    % confirm R is either MapCells or GeographicCellsReference objects
@@ -28,16 +32,16 @@ function [X,Y] = R2grat(R)
    function [Y,X] = mapR2grat(R)
 
       % build query grid from R, adjusted to cell centroids
-      xps = R.CellExtentInWorldX; % x pixel size
-      xmin = R.XWorldLimits(1)+xps/2; % left limit
-      xmax = R.XWorldLimits(2)-xps/2; % right limit
-      xq = xmin:xps:xmax;
+      xpsz = R.CellExtentInWorldX; % x pixel size
+      xmin = R.XWorldLimits(1)+xpsz/2; % left limit
+      xmax = R.XWorldLimits(2)-xpsz/2; % right limit
+      xq = xmin:xpsz:xmax;
 
       % y direction
-      yps = R.CellExtentInWorldY; % y pixel size
-      ymin = R.YWorldLimits(1)+yps/2; % bottom limit
-      ymax = R.YWorldLimits(2)-yps/2; % top limit
-      yq = ymin:yps:ymax;
+      ypsz = R.CellExtentInWorldY; % y pixel size
+      ymin = R.YWorldLimits(1)+ypsz/2; % bottom limit
+      ymax = R.YWorldLimits(2)-ypsz/2; % top limit
+      yq = ymin:ypsz:ymax;
 
       % construct unique x,y pairs for each Zq grid centroid
       [Y,X] = meshgrat(yq,xq);
@@ -58,16 +62,16 @@ function [X,Y] = R2grat(R)
    function [Y,X] = geoR2grat(R)
 
       % build query grid from R, adjusted to cell centroids
-      lonps = R.CellExtentInLongitude; % x pixel size
-      lonmin = R.LongitudeLimits(1)+lonps/2; % left limit
-      lonmax = R.LongitudeLimits(2)-lonps/2; % right limit
-      lonq = lonmin:lonps:lonmax;
+      lonpsz = R.CellExtentInLongitude; % x pixel size
+      lonmin = R.LongitudeLimits(1)+lonpsz/2; % left limit
+      lonmax = R.LongitudeLimits(2)-lonpsz/2; % right limit
+      lonq = lonmin:lonpsz:lonmax;
 
       % y direction
-      latps = R.CellExtentInLatitude; % y pixel size
-      latmin = R.LatitudeLimits(1)+latps/2; % bottom limit
-      latmax = R.LatitudeLimits(2)-latps/2; % top limit
-      latq = latmin:latps:latmax;
+      latpsz = R.CellExtentInLatitude; % y pixel size
+      latmin = R.LatitudeLimits(1)+latpsz/2; % bottom limit
+      latmax = R.LatitudeLimits(2)-latpsz/2; % top limit
+      latq = latmin:latpsz:latmax;
 
       % construct unique x,y pairs for each Zq grid centroid
       [Y,X] = meshgrat(latq,lonq);
