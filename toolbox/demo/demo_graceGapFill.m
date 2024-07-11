@@ -2,30 +2,44 @@ clearvars
 close all
 clc
 
-saveDataFlag = true;
-runGapFillFlag = true;
-plotFiguresFlag = true; % if false, figures are not made
-showFiguresFlag = true; % if false, figure is made but not shown
-saveFiguresFlag = false;
+%% Set paths to the grace data file.
 
+% The grace data used here is from the university of texas at austin:
+% http://www2.csr.utexas.edu/grace/RL06_mascons.html
+
+% The data is stored on a 0.25 degree grid; however the mascons are
+% estimated on 1-degree equal-area mascons and the native resolution
+% of the GRACE/GRACE-FO data is roughly 300km.
+
+% Set these and run config.m before running this demo (See the README).
+config()
 pathname = getenv('GRACE_DATA_PATH');
 filename = getenv('GRACE_DATA_FILE');
 
-% For plotting
-coastlat = load('coastlines.mat').('coastlat');
-coastlon = load('coastlines.mat').('coastlon');
+%% Set options
 
-%% Data notes
+% true = run the gap fill algorithm.
+% false = extract the GRACE data but do not gap-fill it.
+run_gapfill_flag = true;
 
-% the grace data used here is from the university of texas at austin:
-% http://www2.csr.utexas.edu/grace/RL06_mascons.html
+% true = plot the GRACE timeseries and the gap-filled data.
+% false = do not plot the data.
+plot_figures_flag = true;
 
-% note on resolution: '0.25 degree grid; however the mascons are estimated
-% on a 1-degree equal area mascons and the native resolution of the
-% GRACE/GRACE-FO data is roughly 300km'
+% true = show the figures (if plot_figures_flag == true)
+% false = make the figures but do not show them (useful for saving figures).
+show_figures_flag = true;
 
-% the calendar is gregorian, which should be correct using the datetime
-% function method i use below, but not sure about time zone
+% true = save the figures to disk.
+% false = do not save the figures to disk.
+save_figures_flag = false;
+
+% Notes:
+% If show_figures_flag is true, the function graceGapFill will make a figure for
+% every timeseries and pause to look at it, so you have to press any button
+% to advance to the next point. If you set plot_figures_flag true but
+% show_figures_flag false, and save_figures_flag true, the figures will be made
+% and saved to files to look at later, but not displayed as figures.
 
 %% Read the GRACE data
 fileinfo = ncinfo(fullfile(pathname, filename));
@@ -36,6 +50,10 @@ time = ncread(fullfile(pathname, filename), 'time');
 
 % time is 'days since 2002-01-01T00:00:00Z'. Convert to datetime.
 time = datetime(2002,1,1,0,0,0) + days(time);
+
+% Load coastlines for plotting
+coastlat = load('coastlines.mat').('coastlat');
+coastlon = load('coastlines.mat').('coastlon');
 
 %% Make calendars
 [Time_notFilled, Time_referencePeriod] = makeGraceCalendar(time, ...
@@ -61,95 +79,77 @@ colormap('parula')
 colorbar southoutside
 set(gca, 'ColorScale', 'log')
 
-%% Subset the data to a bounding box
-
-% Build a bounding box around Alaska
-minlat = 40;
-minlon = -170;
-maxlat = 85;
-maxlon = -48;
-bbox = [minlon,minlat;maxlon,maxlat];
-xbox = [bbox(1),bbox(2),bbox(2),bbox(1),bbox(1)];
-ybox = [bbox(3),bbox(3),bbox(4),bbox(4),bbox(3)];
-
-% Crop the grace data to a study area
-[LWEcrop, Rcrop] = geocrop(LWE, R, [minlat maxlat], [minlon maxlon]);
-
-% use the cropped data (LWE) and lat/lon
-LWE = LWEcrop;
-R = Rcrop;
-[LON, LAT] = R2grat(R);
-LON = wrapTo180(LON); % wrap grace coordinates to -180:180
-
-%% Plot the cropped data
-figure(2);
-hold on
-worldmap('World')
-geoshow(mean(LWEcrop,3), Rcrop, 'DisplayType', 'texturemap');
-plotm(coastlat, coastlon, 'k')
-colorbar
-set(gca, 'ColorScale', 'log')
-
-%% Plot with the wrapped Lon to make sure it worked
-figure(3)
-hold on
-worldmap('World')
-geoshow(LAT, LON, mean(LWE,3), 'DisplayType', 'texturemap');
-plotm(coastlat, coastlon, 'k')
-colorbar
-set(gca, 'ColorScale', 'log')
-
-
-
-%% Gap filling
-
-% reshape the LWE and lat/lon to find points in each polygon
+%% Reshape the data into lists
 lwe = reshape(LWE, size(LWE,1) * size(LWE,2), size(LWE,3));
 lon = reshape(LON, size(LON,1) * size(LON,2), 1);
 lat = reshape(LAT, size(LAT,1) * size(LAT,2), 1);
-buffer = 0;
 
 %% Example of running for one point
-
-% If showFiguresFlag is true, the function below will make a figure for
-% every timeseries and pause to look at it, so you have to press any button
-% to advance to the next point. If you set plotFiguresFlag true but
-% showFiguresFlag false, and saveFiguresFlag true, the figures will be made 
-% and saved to files to look at later, but not displayed as figures.
-
 Data = graceGapFill(Time_notFilled, lwe(1, :), ...
-   "plotFiguresFlag", plotFiguresFlag, ...
-   "showFiguresFlag", showFiguresFlag, ...
-   "saveFiguresFlag", saveFiguresFlag);
+   "plot_figures_flag", plot_figures_flag, ...
+   "show_figures_flag", show_figures_flag, ...
+   "save_figures_flag", save_figures_flag);
 
-%% Run the algorithm for a shapefile of basins
+%% Example of running the algorithm for a polygon representing a river basin
 
-% bounds is a structure that contains polyshape objects, one for each
-% basin, created by reading in basin shapefiles and converting the lat-
-% lon values to polyshapes. This loop finds the Grace lat/lon values
-% within each basin+buffer, gap-fills all those points and saves the data
-% one file per basin. see util/pointsinPoly and util/fillGRACE.
-npts = zeros(nbasins, 1);
-for n = 1:nbasins
+% Find lat/lon values within the polygon. Set buffer>0 to capture more points.
+poly = load('yukon.mat').('poly');
+Points = pointsInPoly(lon, lat, poly, buffer=0);
+numpts = sum(Points.inpoly);
 
-   poly = bounds.poly(n).geo;
-   Points = pointsInPoly(lon, lat, poly, buffer);
-   npts(n) = sum(Points.inpoly);
-   Sa = lwe(Points.inpoly,:);
+% Subset the GRACE data for points inside the Yukon River Basin
+lwe_Yukon = lwe(Points.inpoly, :);
 
-   % Gap fill at the pixel-scale - VERY SLOW, but necessary to get
-   % error / stdv estimates
+% Plot the basin onto the world map and zoom in
+polylat = poly.Vertices(:, 2);
+polylon = poly.Vertices(:, 1);
 
-   if runGapFillFlag == true
-      fprintf('working on basin %d\n', n);
-      Data = fillGRACE(Time_notFilled, Sa);
+worldmap([min(polylat) max(polylat)], [min(polylon) max(polylon)])
+scatterm(lat(Points.inpoly), lon(Points.inpoly), 20, mean(lwe_Yukon, 2), 'filled')
+plotm(polylat, polylon)
 
-      % note - this saves all the 'cells' meaning the data at all the
-      % sub-basin interpolation points
-      if saveDataFlag == true
-         Data.meta = bounds.meta(n,:);
-         sta = char(bounds.meta.station(n));
-         save(fullfile(pathSave, 'cells', ['grace_filled_' sta]), 'Data');
-      end
-   end
+% Gap fill at the pixel-scale. Note, this can be very slow, but is necessary to
+% get error / stdv estimates for the basin-scale storage. To improve
+% performance, set the ignore_nonunique_flag true and non-unique GRACE data will
+% be ignored. That is, only pixels with unique data will be gap-filled.
+% Non-unique pixels occur when nearest neighbor interpolation is used to
+% resample the native (300 km) or 1-degree GRACE data onto a finer grid, e.g.,
+% the 0.25 x 0.25 degree grid used by the CSR data. In that case, neighboring
+% pixels are often identical. The graceGapFill function only gap-fills one of
+% these identical pixels, and imputes the infilled values for the others.
+
+% If gap-filling at the pixel scale is not necessary, performance can be
+% improved by averaging across pixels and then gap-filling the basin-scale LWE.
+
+if run_gapfill_flag == true
+
+   % Here, plot_figures_flag is set false to avoid creating a figure for every
+   % pixel, but if desired, it can be set true and a unique figure will be
+   % created for each pixel. Provide the pathname_outputs argument to control
+   % where the figures are saved.
+   Data = graceGapFill(Time_notFilled, lwe_Yukon, ...
+      "ignore_nonunique_flag", true, ...
+      "plot_figures_flag", false, ...
+      "show_figures_flag", false, ...
+      "save_figures_flag", false);
+
+   % Add your own code to save the data if desired.
 end
+
+%% Plot the data
+
+% Notice that lwe_filled has 243 timesteps whereas lwe_yukon (unfilled) has 210.
+lwe_filled = Data.S_filled;
+
+% Make another map to confirm the data is similar
+worldmap([min(polylat) max(polylat)], [min(polylon) max(polylon)])
+scatterm(lat(Points.inpoly), lon(Points.inpoly), 20, mean(lwe_filled, 2), 'filled')
+plotm(polylat, polylon)
+
+% Plot the timeseries for a specific point
+point_index = 1;
+show_figure = true;
+plotGapFill(Data, point_index, show_figure)
+
+
+
