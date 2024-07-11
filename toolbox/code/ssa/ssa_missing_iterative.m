@@ -116,7 +116,7 @@ function fun_ex1()
 
    % rng('default');
 
-   load('csr06_n20M40K20_200204-202008_ssa-filling-a.mat');
+   vCS2 = load('csr06_n20M40K20_200204-202008_ssa-filling-a.mat').('vCS2');
    X = vCS2(1,:);
    t = 1:numel(X);
 

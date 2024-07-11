@@ -1,8 +1,8 @@
 function [t_uniform, s_uniform] = uniform_time(t0, s0, trange)
    % uniform time for SSA
-   
+
    % {{SSA; time; uniform; LLZ; regulate}}
-   
+
    PAR = struct('average',1,'interp',0,'gap',1/12);
    % PAR = var_initial(PAR0,varargin);
    % average=0, only search the nearest within gap/2
@@ -34,8 +34,9 @@ function [t_uniform, s_uniform] = uniform_time(t0, s0, trange)
       ind = ~isnan(s_uniform);
       s_uniform = interp1(t_uniform(ind), s_uniform(ind), t_uniform);
    elseif PAR.interp == 2 % SSA
-      [~, RC, htest] = ssa_missing_GO(s_uniform, 48, 10);
-      s_uniform = sum(RC(:,htest==1),2);
+      error('Option 2 is not supported') % ssa_missing_GO is missing
+      % [~, RC, htest] = ssa_missing_GO(s_uniform, 48, 10);
+      % s_uniform = sum(RC(:,htest==1),2);
    end
 
 end
