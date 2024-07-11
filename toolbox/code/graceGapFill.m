@@ -1,5 +1,5 @@
 function Data = graceGapFill(time, lwe, varargin)
-   %GRACEGAPFILL
+   %GRACEGAPFILL Gap-fill GRACE timeseries of liquid water equivalent LWE.
    %
    %  DATA = GRACEGAPFILL(TIME, LWE)
    %
@@ -68,6 +68,7 @@ function Data = graceGapFill(time, lwe, varargin)
    S_input = nan(numdata, numtime); % original, w/ nan in gaps
    S_part_a = nan(numdata, numtime); % output of part a
    S_filled = nan(numdata, numtime); % output of part b
+   optimal_MK = nan(numdata, 2);
 
    % Classify observations and gaps by id
    id = zeros(size(t0));
@@ -132,7 +133,7 @@ function Data = graceGapFill(time, lwe, varargin)
       fprintf( ...
          'wait for cross validation: iter = %d out of %d\n', n, nS);
 
-      [s_part_b, s_error_b, optimal_MK] = fun_SSA_filling_b(...
+      [s_part_b, s_error_b, opt_MK] = fun_SSA_filling_b(...
          t_uniform, s_part_a, Mlist, Klist);
 
       % make plots
@@ -145,7 +146,7 @@ function Data = graceGapFill(time, lwe, varargin)
             end
          end
 
-         plot(t_uniform,s_part_b,'o-','color',[1,1,1]/2);
+         plot(t_uniform, s_part_b, 'o-', 'color', [1,1,1]/2);
          hold on
 
          errorbar(t_uniform(id == 3), s_part_a(id == 3), ...
@@ -179,7 +180,7 @@ function Data = graceGapFill(time, lwe, varargin)
          S_filled(irepl(m), :) = s_part_b;
          S_error(irepl(m), 1) = s_error_a;
          S_error(irepl(m), 2) = s_error_b;
-         optimal_MK(irepl(m), :) = optimal_MK;
+         optimal_MK(irepl(m), :) = opt_MK;
       end
    end
 
@@ -187,17 +188,17 @@ function Data = graceGapFill(time, lwe, varargin)
    T = decimalyear2datetime(t_uniform);
    T.Format = 'dd-MMM-uuuu';
 
-   %    switch nargout
-   %       case 1
-   %          varargout{1} = S_filled;
+   % switch nargout
+   %    case 1
+   %       varargout{1} = S_filled;
    %
-   %    end
+   % end
    Data.S_filled = S_filled;
    Data.S_input = S_input;
    Data.S_part_a = S_part_a;
    Data.S_error = S_error;
    Data.time = T;
-   Data.optMK = optimal_MK;
+   Data.optimal_MK = optimal_MK;
    Data.id = id;
 end
 
