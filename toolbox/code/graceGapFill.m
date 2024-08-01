@@ -1,44 +1,75 @@
 function Data = graceGapFill(time, lwe, varargin)
    %GRACEGAPFILL Gap-fill GRACE timeseries of liquid water equivalent LWE.
    %
-   %  DATA = GRACEGAPFILL(TIME, LWE)
+   %  Syntax:
    %
-   % Inputs (see functionSignatures.json):
+   %    Data = graceGapFill(time, lwe)
+   %    Data = graceGapFill(time, lwe, pathname_outputs=pathname)
+   %    Data = graceGapFill(time, lwe, plot_figures_flag=true)
+   %    Data = graceGapFill(time, lwe, save_figures_flag=true)
+   %    Data = graceGapFill(time, lwe, show_figures_flag=true)
+   %    Data = graceGapFill(time, lwe, ignore_nonunique_flag=true)
    %
-   %  time - datetime array for GRACE data
-   %  lwe - numeric array of GRACE lwe_thickness time series
+   %  Description
    %
-   %  lwe can be an array of size numPoints x numTimesteps
-   %  size(lwe, 2) must match numel(time) i.e., time across the column
+   %    DATA = GRACEGAPFILL(TIME, LWE) fills gaps (missing values) in monthly
+   %    LWE data. LWE is "liquid water equivalent" terrestrial water storage
+   %    anomalies from GRACE satellite gravimetry. The TIME and LWE data should
+   %    be the values as they exist in the GRACE data file i.e., without the
+   %    missing data filled in, and therefore TIME should be an irregular
+   %    calendar. The data is returned with all months gap-filled and a
+   %    pseudo-regular calendar; the calendar contains a complete set of months,
+   %    the original dates (approximately mid-month) are left intact where LWE
+   %    was not missing, and new, gap-filled dates are posted at approximately
+   %    equal-spaced mid-month intervals where LWE was missing.
    %
-   % These are the original notes from Shuang's script. I renamed tt1 to
-   % time and made it a datetime array.
-   %  tt1:      equal-spaced time
-   %  X1:       rearranged S, NaN is assigned to gaps
-   %  X2:       results after SSA-filling-a gaps (id = 3) are filled.
-   %  verror1:  error estimation, based on fitting residuals
-   %  X3:       final output, all gaps are filled
-   %  verror2:  error esimation, based on the cross validation (if implemented,
-   %            otherwise based on fitting residuals).
+   %  Inputs:
    %
-   % Author: Matt Cooper matt.cooper@pnnl.gov (Based on script written by
-   % Shuang Yi, shuangyi.geo@gmail.com, 05/12/2021, see reference below
-   % and associated github repo)
+   %    TIME - datetime vector. The dates are assumed to be non-uniform with
+   %    missing values where corresponding LWE data is missing. Do not create a
+   %    uniform calendar and/or impute NaN into the GRACE data to fill missing
+   %    data. Instead, use the calendar (and the LWE data) supplied with the
+   %    GRACE data file, which will be an irregular calendar with dates where
+   %    corresponding data exists, i.e., with missing months.
    %
-   % This function implements the GRACE gap-filling algorithm in the
-   % reference below. The function is based on the script that comes with
-   % the repo 'main_SSA_gap_filling.m'.
+   %    LWE - numeric array (1d or 2d) of GRACE lwe_thickness time series. LWE
+   %    can be a row of size [1 time] or an array of size [gridcell time]. If
+   %    LWE is of size [time gridcell], the function attempts to reorient it to
+   %    match the size of TIME.
+   %
+   %  Outputs:
+   %
+   %    DATA - A structure containing the following fields:
+   %     * S_filled - the gap-filled LWE data
+   %     * S_input - the input LWE data
+   %     * S_part_a - the output of "part a" of the algorithm (GRACE gaps filled)
+   %     * S_error - estimated residual error in the gap-filled values
+   %     * time - the gap-filled regularly-spaced calendar
+   %     * optimal_MK - the estimated optimal values of the M,K parameters
+   %     * id - IDs for the three types of GRACE data: non-missing values during
+   %     the GRACE mission period (id=1), non-missing values during the GRACE
+   %     Follow-On (GFO) mission period (id=2), missing values during the GRACE
+   %     mission period (id=3), and the 11-month gap between GRACE and GFO.
+   %
+   %  Author: Matt Cooper matt.cooper@pnnl.gov (Based on script written by
+   %  Shuang Yi, shuangyi.geo@gmail.com, 05/12/2021, see reference below
+   %  and associated github repo)
+   %
+   %  This function implements the GRACE gap-filling algorithm in the
+   %  reference below. The function is based on the script that comes with
+   %  the repo 'main_SSA_gap_filling.m'.
    %
    % Reference:
-   % "Filling the data gaps within GRACE missions using Singular Spectrum Analysis"
-   % Journal of Geophysical Research: Solid earth
-   % Shuang Yi, Nico Sneeuw
-   % https://doi.org/10.1029/2020JB021227
-   % ---
-   % Shuang Yi, shuangyi.geo@gmail.com, 05/12/2021
+   %    "Filling the data gaps within GRACE missions using Singular Spectrum
+   %    Analysis"
+   %    Journal of Geophysical Research: Solid earth
+   %    Shuang Yi, Nico Sneeuw
+   %    https://doi.org/10.1029/2020JB021227
+   %
+   % See also:
 
    % Parse inputs
-   kwargs = parseinputs(time, lwe, mfilename, varargin{:});
+   [time, lwe, kwargs] = parseinputs(time, lwe, mfilename, varargin{:});
 
    % Define the window sizes
    MM = 24; % Window size
@@ -164,7 +195,7 @@ function Data = graceGapFill(time, lwe, varargin)
                kwargs.pathname_outputs, ['gap_filled_' int2str(n) '.png']);
             exportgraphics(gcf, filename, 'Resolution', 300);
          end
-         if kwargs.show_figures_flag
+         if kwargs.show_figures_flag && n < nS
             pause
          end
          if n < nS
@@ -203,20 +234,27 @@ function Data = graceGapFill(time, lwe, varargin)
 end
 
 %%
-function kwargs = parseinputs(time, lwe, mfilename, varargin)
+function [time, lwe, kwargs] = parseinputs(time, lwe, mfilename, varargin)
    parser = inputParser;
    parser.FunctionName = mfilename;
    parser.addRequired('time', @isdatetime);
-   parser.addRequired('lwe', @isnumeric);
+   parser.addRequired('lwe', @isnumericmatrix);
    parser.addParameter('pathname_outputs', '', @ischar);
-   parser.addParameter('plot_figures_flag', false, @islogical);
-   parser.addParameter('save_figures_flag', false, @islogical);
-   parser.addParameter('show_figures_flag', false, @islogical);
-   parser.addParameter('ignore_nonunique_flag', false, @islogical);
-   parser.addParameter('append_data_flag', false, @islogical);
+   parser.addParameter('plot_figures_flag', false, @islogicalscalar);
+   parser.addParameter('save_figures_flag', false, @islogicalscalar);
+   parser.addParameter('show_figures_flag', false, @islogicalscalar);
+   parser.addParameter('ignore_nonunique_flag', false, @islogicalscalar);
+   parser.addParameter('append_data_flag', false, @islogicalscalar);
    parser.addParameter('GraceData', struct(), @isstruct);
    parser.parse(time, lwe, varargin{:});
    kwargs = parser.Results;
+
+   % Ensure lwe is [points x time]
+   time = time(:);
+   if size(lwe, 1) == numel(time)
+      lwe = transpose(lwe);
+   end
+   assert(size(lwe, 2) == numel(time))
 end
 
 %%
