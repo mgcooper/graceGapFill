@@ -1,26 +1,45 @@
-function y = nanmedian(varargin)
-   %NANMEDIAN Compute the sample median, ignoring NaNs.
+function cleanupObj = withwarnoff(warningIDs)
+   %WITHWARNOFF Temporarily disable warnings
    %
-   % This function is a wrapper for built-in function median with flag 'omitnan'
-   % i.e., mean(varargin{:}, 'omitnan').
+   % WITHWARNOFF('stats:nlinfit:IllConditionedJacobian') disables the warning
+   % and reenables it when the calling function exits.
    %
-   % Y = NANMEDIAN(X) returns the sample median of X ignoring NaNs.
+   % cleanupObj = WITHWARNOFF('stats:nlinfit:IllConditionedJacobian') disables
+   % the warning and reenables it when cleanupObj is destroyed.
    %
-   % See also MEAN, NANMEAN, NANSTD, NANVAR, NANMIN, NANMAX, NANSUM.
+   % Note that it's not necessary for the function to return the onCleanup
+   % object because it works automatically once it's created. However, you might
+   % want to return it if you need to manually trigger the cleanup (by deleting
+   % the object) or prevent the cleanup (by keeping a reference to the object so
+   % it doesn't get deleted).
+   %
+   % Based on Andrew Janke's code.
+   %
+   % See also withcd, withjava
 
-   % PARSE INPUTS
-   narginchk(1,2);
+   arguments
+      warningIDs string
+   end
 
-   % MAIN CODE
-   y = median(varargin{:},'omitnan');
+   % Save the current state of the warnings
+   originalWarningState = warning;
+
+   % Create a cleanup object that will be executed when the function is exited
+   cleanupObj = onCleanup(@() warning(originalWarningState));
+
+   % Turn off the specified warnings
+   for n = 1:numel(warningIDs)
+      warning('off', warningIDs(n));
+   end
+
+   % Note: varargout style return destroys the cleanupObj, so don't use it.
 end
 
-%% LICENSE
-
+%% BSD 3-Clause License
+%
 % BSD 3-Clause License
 %
-% Copyright (c) 2023, Matt Cooper (mgcooper)
-% All rights reserved.
+% Copyright (c) 2023, Matt Cooper (mgcooper) All rights reserved.
 %
 % Redistribution and use in source and binary forms, with or without
 % modification, are permitted provided that the following conditions are met:

@@ -99,3 +99,12 @@ function [tt, sfilename] = generate_tt(t1,o_t2,idatenum)
    % stmp{1:2}
    sfilename = stmp(imonth1:end-12+imonth2);
 end
+
+function t = time_transfer(t, dim)
+   % mgc: this is a dummy function created to suppress code issues b/c
+   % time_transfer is not in the toolbox. It is only called when numel(t1) == 1
+   % or idatenum == 1, but idatenum only == 1 if its passed in to generate_tt as
+   % the third arg, and the only call to generate_tt only uses 2 inputs.
+
+   error('time_transfer function is missing')
+end

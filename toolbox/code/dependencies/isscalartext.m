@@ -1,19 +1,52 @@
-function y = nanmedian(varargin)
-   %NANMEDIAN Compute the sample median, ignoring NaNs.
+function tf = isscalartext(X)
+   %ISSCALARTEXT Return true if input is scalar text
    %
-   % This function is a wrapper for built-in function median with flag 'omitnan'
-   % i.e., mean(varargin{:}, 'omitnan').
+   %  TF = ISSCALARTEXT(X) returns TF = true if X is a row vector of char's or
+   %  a scalar string.
    %
-   % Y = NANMEDIAN(X) returns the sample median of X ignoring NaNs.
+   % Examples
+   % tf = isscalartext('')
+   % tf =
+   % logical
+   %  1
    %
-   % See also MEAN, NANMEAN, NANSTD, NANVAR, NANMIN, NANMAX, NANSUM.
+   % tf = isscalartext('scalar')
+   % tf =
+   % logical
+   %  1
+   %
+   % tf = isscalartext("scalar")
+   % tf =
+   % logical
+   %  1
+   %
+   % tf = isscalartext(["scalar", "nonscalar"])
+   % tf =
+   % logical
+   %  0
+   %
+   % tf = isscalartext({'scalar'})
+   % tf =
+   % logical
+   %  0
+   %
+   % Copyright (c) 2023, Matt Cooper, BSD 3-Clause License, github.com/mgcooper
+   %
+   % See also: ischarlike
 
    % PARSE INPUTS
-   narginchk(1,2);
+   narginchk(1,1)
 
    % MAIN CODE
-   y = median(varargin{:},'omitnan');
+   tf = ( ischar(X) && (isrow(X) || isequal(X, '')) ) || ...
+      (isstring(X) && isscalar(X));
 end
+
+%% TESTS
+
+%!test
+
+% ## add octave tests here
 
 %% LICENSE
 
