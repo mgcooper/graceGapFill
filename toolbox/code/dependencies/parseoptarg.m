@@ -1,7 +1,7 @@
 function [opt, args, nargs] = parseoptarg(args, validopts, defaultopt)
    %PARSEOPTARG parse optional scalar text parameter in variable argument list.
    %
-   %  [OPT, ARGS, NARGS] = PARSEOPTARG(ARGS, VALIDOPTS, DEFAULTOPT)
+   %  [opt, args, nargs] = parseoptarg(args, validopts, defaultopt)
    %
    % Description
    %
