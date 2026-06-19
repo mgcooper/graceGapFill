@@ -18,7 +18,7 @@ function varargout = createMatlabProject(projectFolder, projectName, ...
    %
    %  PROJECTFOLDER - The parent (top level) project folder (scalar text). Can
    %  be a full path or name from which the full path is constructed using the
-   %  MATLABPROJECTPATH environment variable. The default is pwd().
+   %  MATLAB_PROJECT_PATH environment variable. The default is pwd().
    %
    %  PROJECTNAME - Scalar text used for the .prj filename. If not provided, the
    %  PROJECTFOLDER folder name is used for PROJECTNAME. The .prj filename is
