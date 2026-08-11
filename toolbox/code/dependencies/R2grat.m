@@ -14,11 +14,23 @@ function [X,Y] = R2grat(R)
    assert(license('test','map_toolbox')==1, ...
       'rasterinterp requires Matlab''s Mapping Toolbox.')
 
-   % confirm R is either MapCells or GeographicCellsReference objects
+   % confirm R is a cells or postings reference (planar or geographic)
    validateattributes(R, ...
       {'map.rasterref.MapCellsReference', ...
-      'map.rasterref.GeographicCellsReference'}, ...
+      'map.rasterref.GeographicCellsReference', ...
+      'map.rasterref.MapPostingsReference', ...
+      'map.rasterref.GeographicPostingsReference'}, ...
       {'scalar'}, 'R2grat', 'R', 2)
+
+   % Postings: limits coincide with the outer sample points, so use the built-in
+   % grid accessors directly (no inward half-cell adjustment).
+   if isa(R, 'map.rasterref.MapPostingsReference')
+      [X,Y] = worldGrid(R);
+      return
+   elseif isa(R, 'map.rasterref.GeographicPostingsReference')
+      [Y,X] = geographicGrid(R);
+      return
+   end
 
    % determine if R is planar or geographic and call the appropriate function
    if strcmp(R.CoordinateSystemType,'planar')
@@ -44,7 +56,9 @@ function [X,Y] = R2grat(R)
       yq = ymin:ypsz:ymax;
 
       % construct unique x,y pairs for each Zq grid centroid
-      [Y,X] = meshgrat(yq,xq);
+      % (meshgrid(xq,yq) replaces the removed meshgrat(yq,xq) -- same result:
+      % X varies across columns, Y down rows)
+      [X,Y] = meshgrid(xq,yq);
 
       % UPDATE Jul 2019 added this basedon experience, this is the revers
       % of how it's done in rasterinterp
@@ -52,8 +66,10 @@ function [X,Y] = R2grat(R)
          Y = flipud(Y);
       end
 
-      % flip the data left/right if oriented E-W
-      if strcmp(R.ColumnsStartFrom,'east')
+      % flip the data left/right if oriented E-W. RowsStartFrom is the horizontal
+      % direction ('west'|'east'); ColumnsStartFrom is vertical and never 'east',
+      % so the old test was a dead branch.
+      if strcmp(R.RowsStartFrom,'east')
          X = fliplr(X);
       end
 
@@ -74,7 +90,8 @@ function [X,Y] = R2grat(R)
       latq = latmin:latpsz:latmax;
 
       % construct unique x,y pairs for each Zq grid centroid
-      [Y,X] = meshgrat(latq,lonq);
+      % (meshgrid(lonq,latq) replaces the removed meshgrat(latq,lonq))
+      [X,Y] = meshgrid(lonq,latq);
 
       % UPDATE Jul 2019 added this basedon experience, this is the revers
       % of how it's done in rasterinterp
@@ -82,8 +99,10 @@ function [X,Y] = R2grat(R)
          Y = flipud(Y);
       end
 
-      % flip the data left/right if oriented E-W
-      if strcmp(R.ColumnsStartFrom,'east')
+      % flip the data left/right if oriented E-W. RowsStartFrom is the horizontal
+      % direction ('west'|'east'); ColumnsStartFrom is vertical and never 'east',
+      % so the old test was a dead branch.
+      if strcmp(R.RowsStartFrom,'east')
          X = fliplr(X);
       end
    end
