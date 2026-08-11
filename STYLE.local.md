@@ -22,3 +22,19 @@ libraries/toolboxes, and how new or risky code is staged.
 
 TODO: anything else specific to this project — kernel conventions, argument-ordering
 schemas, domain prefixes, etc. Delete this section if unused.
+
+## Prose examples
+
+Rewrite this:
+
+> Note that it's not necessary for the function to return the onCleanup object
+> because it works automatically once it's created. However, you might want to
+> return it if you need to manually trigger the cleanup (by deleting the object)
+> or prevent the cleanup (by keeping a reference to the object so it doesn't get
+> deleted).
+
+as this:
+
+> The onCleanup object runs when it is destroyed, so the function does not have
+> to return it. Return it to control the cleanup time. Delete the object to run
+> the cleanup early. Hold a reference to delay it.
