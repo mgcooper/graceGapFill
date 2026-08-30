@@ -55,9 +55,19 @@ function proj = projectfile(buildOption, projectName, codeFolders, opts)
          return
 
       case 'create'
-         % Create the project
-         proj = createMatlabProject(projectFolder, opts.addProjectFiles, ...
-            opts.addCodeFiles, codeFolders, projectName);
+         % Create the project. The vendored createMatlabProject takes the
+         % positional order (folder, name, addProjectFiles, addProjectFolders,
+         % addChildFiles, projectSubfolders, ignoredSubFolders).
+         % addProjectFolders=true because its code adds the selected
+         % codeFolders only inside that branch (its help text claims
+         % otherwise). opts.addProjectFiles governs top-level files.
+         % opts.addCodeFiles controls whether the codeFolders' files are
+         % added recursively. Pass ignoredSubFolders: the vendored default
+         % "" makes its contains() filter match every folder, which erases
+         % the whole subfolder list.
+         proj = createMatlabProject(projectFolder, projectName, ...
+            opts.addProjectFiles, true, opts.addCodeFiles, codeFolders, ...
+            [".git", ".svn"]);
 
       case 'resolve'
          % Resolve dependencies
