@@ -5,3 +5,11 @@ config.m
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# MATLAB Project state. Track resources/project, the project definition
+# openProject reads, so a fresh clone opens as a Project without running
+# the generator first. Ignore every other path under a resources/ folder:
+# MATLAB writes derived caches there, and a cached copy of another
+# project's state is machine-local, not source.
+**/resources/*
+!**/resources/project/
