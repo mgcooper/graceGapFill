@@ -42,17 +42,17 @@ preference.
   never silently drop the detail a comment held.
 - Group operations logically.
 
-## Agent-authored prose
+## Prose
 
 Write all prose in Simplified Technical English. Follow the ASD-STE100
-guidelines as adapted by the rules below. This standard applies to all text
-an agent writes:
+guidelines as adapted by the rules below. This standard applies to all
+project text:
 
 - code comments and docstrings;
 - documentation, READMEs, and reports;
 - commit messages and planning records;
-- skill instructions and agent guidance;
-- chat responses to the user.
+- contributor guidance and process notes;
+- issue, review, and handoff comments.
 
 ### Write like this
 
@@ -127,17 +127,17 @@ Accuracy outranks form. When a fact does not fit a rule, keep the fact and
 write the closest compliant sentence. A missing dictionary, style checker,
 or voice profile is never a reason to deviate from these rules.
 
-### Humanize pass
+### Editing order
 
-Complete factual and structural editing before applying `$humanize-prose`.
-That skill defines the pass's targets, exclusions, preservation rules,
-and Quarto protections.
-The write-time rules above govern every file, including files the pass
-excludes.
+Complete factual and structural editing before any voice or readability pass.
+A voice or readability pass defines its own targets, exclusions, preservation
+rules, and markup protections.
+The write-time rules above govern every file, including files that such a
+pass excludes.
 
 # MATLAB conventions
 
-Canonical conventions shared across MATLAB projects. These extend the language-agnostic
+Conventions for MATLAB projects. These extend the language-agnostic
 rules above. Opinionated, project-varying choices belong in `STYLE.local.md`.
 
 ## Function naming
@@ -199,11 +199,10 @@ rules above. Opinionated, project-varying choices belong in `STYLE.local.md`.
 ## Running MATLAB
 
 - Never launch the MATLAB desktop GUI to run code. Run headless from a shell with
-  `matlab -nodisplay -nosplash -batch "<expr>"` — `-batch` or MATLAB MCP.
+  `matlab -nodisplay -nosplash -batch "<expr>"`.
 - Prefer the shell launcher for batch runs, tests, and anything you may need to
-  debug from full stdout/stderr. Prefer the MATLAB MCP only for short
-  interactive checks when an already-open session is available and its returned
-  result shape is sufficient.
+  debug from full stdout/stderr. Use an already-open interactive MATLAB session
+  only for short checks, and only when its returned result shape is sufficient.
 - If `matlab` is not on `$PATH`, locate the installed binary and invoke its
   absolute path. Record a durable machine- or project-specific launcher path in
   `STYLE.local.md`, not this shared style file.

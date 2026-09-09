@@ -1,8 +1,7 @@
 # Project-specific code style — graceGapFill
 
-Conventions specific to this project, extending the canonical `STYLE.md` (and any
-language conventions merged into it). This file is project-owned — `--update` never
-overwrites it.
+Conventions specific to this project, extending `STYLE.md` (and any language conventions
+merged into it).
 
 ## Naming
 
